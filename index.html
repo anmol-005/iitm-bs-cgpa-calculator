@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CGPA Calculator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .tab-active {
+            border-color: #3b82f6; /* blue-500 */
+            color: #3b82f6;
+            background-color: #eff6ff; /* blue-50 */
+        }
+    </style>
+</head>
+<body class="bg-gray-100 text-gray-800">
+
+    <div class="container mx-auto p-4 sm:p-6 lg:p-8 max-w-4xl">
+        <div class="bg-white rounded-2xl shadow-lg p-6 md:p-8">
+            
+            <header class="text-center mb-8">
+                <h1 class="text-3xl sm:text-4xl font-bold text-gray-900">CGPA Calculator</h1>
+                <p class="text-gray-600 mt-2">Choose your input method, select courses, enter grades, and calculate your CGPA.</p>
+            </header>
+
+            <!-- Tabs -->
+            <div class="mb-6">
+                <div class="border-b border-gray-200">
+                    <nav class="-mb-px flex space-x-4" aria-label="Tabs">
+                        <button id="tab-by-course" class="tab-active whitespace-nowrap py-3 px-4 border-b-2 font-medium text-sm rounded-t-lg">
+                            Input by Course
+                        </button>
+                        <button id="tab-by-grade" class="text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-3 px-4 border-b-2 font-medium text-sm rounded-t-lg">
+                            Input by Grade
+                        </button>
+                    </nav>
+                </div>
+            </div>
+
+            <!-- Tab Content -->
+            <div id="view-by-course">
+                <!-- Course Selection Section -->
+                <div class="mb-8">
+                    <h2 class="text-2xl font-semibold mb-4 border-b pb-2 border-gray-200">1. Select Your Courses</h2>
+                    <div id="course-list" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                        <!-- Course checkboxes will be dynamically inserted here -->
+                    </div>
+                </div>
+
+                <!-- Grade Input Section -->
+                <div>
+                    <h2 class="text-2xl font-semibold mb-4 border-b pb-2 border-gray-200">2. Enter Your Grades</h2>
+                    <div id="selected-courses" class="space-y-4">
+                        <p class="text-gray-500">No courses selected yet. Please select courses from the list above.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div id="view-by-grade" class="hidden">
+                 <h2 class="text-2xl font-semibold mb-4 border-b pb-2 border-gray-200">Add Courses to Each Grade</h2>
+                 <div id="grade-sections-container" class="space-y-6">
+                    <!-- Grade sections will be inserted here -->
+                 </div>
+            </div>
+            
+            <!-- Calculation and Result Section -->
+            <div class="mt-8 text-center">
+                 <button id="calculate-btn" class="bg-blue-600 text-white font-bold py-3 px-8 rounded-lg shadow-md hover:bg-blue-700 transition-all duration-300 transform hover:scale-105 disabled:bg-gray-400 disabled:cursor-not-allowed disabled:scale-100">
+                    Calculate CGPA
+                </button>
+            </div>
+
+            <div id="result-container" class="hidden mt-6 text-center bg-gray-50 p-6 rounded-2xl border border-gray-200">
+                <h3 class="text-xl font-semibold text-gray-700 mb-2">Your Calculated CGPA is:</h3>
+                <p id="cgpa-result" class="text-5xl font-bold text-blue-600">0.00</p>
+                <p id="calculation-details" class="text-sm text-gray-500 mt-2"></p>
+            </div>
+            
+            <!-- Grade Point Legend -->
+            <div class="mt-8 pt-6 border-t border-gray-200">
+                <h3 class="text-lg font-semibold text-center mb-3">Grade Point Legend</h3>
+                <div class="flex justify-center flex-wrap gap-x-4 gap-y-2 text-sm text-gray-600">
+                    <span><b>S</b>: 10</span> <span><b>A</b>: 9</span> <span><b>B</b>: 8</span>
+                    <span><b>C</b>: 7</span> <span><b>D</b>: 6</span> <span><b>E</b>: 5</span>
+                    <span><b>U</b> / Fail: 0</span>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        const courses = [
+            { code: "BSMA1001", name: "Mathematics for Data Science I", credits: 4 }, { code: "BSMA1002", name: "Statistics for Data Science I", credits: 4 }, { code: "BSCS1001", name: "Computational Thinking", credits: 4 }, { code: "BSHS1001", name: "English I", credits: 4 }, { code: "BSMA1003", name: "Mathematics for Data Science II", credits: 4 }, { code: "BSMA1004", name: "Statistics for Data Science II", credits: 4 }, { code: "BSCS1002", name: "Programming in Python", credits: 4 }, { code: "BSHS1002", name: "English II", credits: 4 }, { code: "BSCS2001", name: "Database Management Systems", credits: 4 }, { code: "BSCS2002", name: "Programming, Data Structures and Algorithms using Python", credits: 4 }, { code: "BSCS2003", name: "Modern Application Development I", credits: 4 }, { code: "BSCS2003P", name: "Modern Application Development I - Project", credits: 2 }, { code: "BSCS2005", name: "Programming Concepts using Java", credits: 4 }, { code: "BSCS2006", name: "Modern Application Development II", credits: 4 }, { code: "BSCS2006P", name: "Modern Application Development II - Project", credits: 2 }, { code: "BSSE2001", name: "System Commands", credits: 3 }, { code: "BSCS2004", name: "Machine Learning Foundations", credits: 4 }, { code: "BSMS2001", name: "Business Data Management", credits: 4 }, { code: "BSCS2007", name: "Machine Learning Techniques", credits: 4 }, { code: "BSCS2008", name: "Machine Learning Practice", credits: 4 }, { code: "BSCS2008P", name: "Machine Learning Practice - Project", credits: 2 }, { code: "BSSE2002", name: "Tools in Data Science", credits: 3 }, { code: "BSMS2001P", name: "Business Data Management - Project", credits: 2 }, { code: "BSMS2002", name: "Business Analytics", credits: 4 }, { code: "BSDA2001", name: "Introduction to Deep Learning and Generative AI", credits: 4 }, { code: "BSDA2001P", name: "Deep Learning and Generative AI - Project", credits: 2 }
+        ].sort((a, b) => a.name.localeCompare(b.name));
+
+        const gradePoints = { 'S': 10, 'A': 9, 'B': 8, 'C': 7, 'D': 6, 'E': 5, 'U': 0 };
+
+        // --- DOM Elements ---
+        const calculateBtn = document.getElementById('calculate-btn');
+        const resultContainer = document.getElementById('result-container');
+        const cgpaResult = document.getElementById('cgpa-result');
+        const calculationDetails = document.getElementById('calculation-details');
+        const tabByCourse = document.getElementById('tab-by-course');
+        const tabByGrade = document.getElementById('tab-by-grade');
+        const viewByCourse = document.getElementById('view-by-course');
+        const viewByGrade = document.getElementById('view-by-grade');
+
+        // --- State ---
+        let selections = []; // Single source of truth: [{ code: 'BSCS1001', grade: 'S' }, ...]
+
+        // --- Main Render Function ---
+        function renderAll() {
+            renderCourseFirstView();
+            renderGradeFirstView();
+            updateButtonState();
+        }
+
+        // --- View 1: Input by Course ---
+        function renderCourseFirstView() {
+            const courseListContainer = document.getElementById('course-list');
+            const selectedCoursesContainer = document.getElementById('selected-courses');
+            courseListContainer.innerHTML = '';
+            selectedCoursesContainer.innerHTML = '';
+            
+            const selectedCodes = selections.map(s => s.code);
+
+            courses.forEach(course => {
+                const isSelected = selectedCodes.includes(course.code);
+                const div = document.createElement('div');
+                div.className = "flex items-center bg-gray-50 p-3 rounded-lg border border-gray-200";
+                
+                const input = document.createElement('input');
+                input.type = 'checkbox';
+                input.id = `check-${course.code}`;
+                input.value = course.code;
+                input.checked = isSelected;
+                input.className = "h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500";
+                input.addEventListener('change', (e) => handleCourseSelectionToggle(e.target.value, e.target.checked));
+
+                const label = document.createElement('label');
+                label.htmlFor = `check-${course.code}`;
+                label.className = "ml-3 block text-sm font-medium text-gray-700 select-none";
+                label.textContent = `${course.name} (${course.credits} credits)`;
+
+                div.appendChild(input);
+                div.appendChild(label);
+                courseListContainer.appendChild(div);
+            });
+
+            if (selections.length === 0) {
+                selectedCoursesContainer.innerHTML = `<p class="text-gray-500">No courses selected yet. Please select courses from the list above.</p>`;
+                return;
+            }
+
+            selections.forEach(({ code, grade }) => {
+                const course = courses.find(c => c.code === code);
+                const div = document.createElement('div');
+                div.className = "grid grid-cols-1 md:grid-cols-2 gap-4 items-center p-4 bg-white rounded-lg border border-gray-200 shadow-sm";
+                div.innerHTML = `<p class="font-medium text-gray-800">${course.name}</p>`;
+                
+                const select = document.createElement('select');
+                select.className = "mt-1 md:mt-0 block w-full rounded-md border-gray-300 py-2 pl-3 pr-10 text-base focus:border-blue-500 focus:outline-none focus:ring-blue-500 sm:text-sm";
+                select.innerHTML = `<option value="" disabled ${!grade ? 'selected' : ''}>Select Grade</option>`;
+                Object.keys(gradePoints).forEach(g => {
+                    select.innerHTML += `<option value="${g}" ${grade === g ? 'selected' : ''}>${g}</option>`;
+                });
+                select.addEventListener('change', (e) => updateGrade(code, e.target.value));
+                div.appendChild(select);
+                selectedCoursesContainer.appendChild(div);
+            });
+        }
+        
+        // --- View 2: Input by Grade ---
+        function renderGradeFirstView() {
+            const container = document.getElementById('grade-sections-container');
+            container.innerHTML = '';
+            
+            const unassignedCourses = courses.filter(c => !selections.some(s => s.code === c.code));
+
+            Object.keys(gradePoints).reverse().forEach(grade => {
+                const gradeSection = document.createElement('div');
+                gradeSection.className = "p-4 border rounded-lg bg-gray-50";
+
+                const assignedCourses = selections.filter(s => s.grade === grade);
+
+                let courseListHtml = '';
+                if(assignedCourses.length > 0) {
+                    courseListHtml = `<ul class="space-y-2 mt-3">` + assignedCourses.map(s => {
+                         const course = courses.find(c => c.code === s.code);
+                         return `<li class="flex justify-between items-center text-sm p-2 bg-white rounded-md border">
+                                    <span>${course.name} (${course.credits} credits)</span>
+                                    <button data-code="${course.code}" class="remove-btn text-red-500 hover:text-red-700 font-bold text-lg">&times;</button>
+                                 </li>`;
+                    }).join('') + `</ul>`;
+                }
+
+                let dropdownOptions = '<option value="" disabled selected>Add a course...</option>';
+                unassignedCourses.forEach(c => {
+                    dropdownOptions += `<option value="${c.code}">${c.name}</option>`;
+                });
+
+                gradeSection.innerHTML = `
+                    <div class="flex flex-wrap justify-between items-center gap-2">
+                        <h3 class="text-lg font-bold text-blue-700 w-full sm:w-auto">Grade ${grade} <span class="text-sm font-medium text-gray-500">(${assignedCourses.length} courses)</span></h3>
+                        <select class="add-course-select w-full sm:w-64 rounded-md border-gray-300 shadow-sm text-sm" data-grade="${grade}">
+                            ${dropdownOptions}
+                        </select>
+                    </div>
+                    ${courseListHtml}
+                `;
+                container.appendChild(gradeSection);
+            });
+            
+            // Add event listeners after creation
+            container.querySelectorAll('.add-course-select').forEach(sel => sel.addEventListener('change', (e) => addCourseToGrade(e.target.value, e.target.dataset.grade)));
+            container.querySelectorAll('.remove-btn').forEach(btn => btn.addEventListener('click', (e) => handleCourseSelectionToggle(e.target.dataset.code, false)));
+        }
+
+        // --- State Update Handlers ---
+        function handleCourseSelectionToggle(courseCode, isSelected) {
+            if (isSelected) {
+                selections.push({ code: courseCode, grade: null });
+            } else {
+                selections = selections.filter(s => s.code !== courseCode);
+            }
+            selections.sort((a,b) => courses.findIndex(c => c.code === a.code) - courses.findIndex(c => c.code === b.code));
+            renderAll();
+        }
+
+        function updateGrade(courseCode, grade) {
+            const selection = selections.find(s => s.code === courseCode);
+            if (selection) {
+                selection.grade = grade;
+            }
+            renderAll();
+        }
+        
+        function addCourseToGrade(courseCode, grade) {
+            if(!courseCode) return;
+            selections.push({ code: courseCode, grade: grade });
+            renderAll();
+        }
+        
+        // --- General Functions ---
+        function updateButtonState() {
+            calculateBtn.disabled = selections.length === 0;
+        }
+
+        function calculateCGPA() {
+            let totalCredits = 0;
+            let totalWeightedPoints = 0;
+            const gradedSelections = selections.filter(s => s.grade);
+
+            if (gradedSelections.length !== selections.length) {
+                alert("Please select a grade for all chosen courses before calculating.");
+                resultContainer.classList.add('hidden');
+                return;
+            }
+
+            gradedSelections.forEach(({ code, grade }) => {
+                const course = courses.find(c => c.code === code);
+                const credits = course.credits;
+                const gp = gradePoints[grade];
+                totalCredits += credits;
+                totalWeightedPoints += credits * gp;
+            });
+            
+            if (totalCredits === 0) {
+                cgpaResult.textContent = '0.00';
+                calculationDetails.textContent = 'No courses with valid grades selected.';
+            } else {
+                const cgpa = totalWeightedPoints / totalCredits;
+                cgpaResult.textContent = cgpa.toFixed(2);
+                calculationDetails.textContent = `Based on ${totalWeightedPoints.toFixed(2)} total points and ${totalCredits} credits.`;
+            }
+            resultContainer.classList.remove('hidden');
+        }
+
+        function switchTab(tab) {
+            if (tab === 'course') {
+                tabByCourse.classList.add('tab-active');
+                tabByGrade.classList.remove('tab-active');
+                viewByCourse.classList.remove('hidden');
+                viewByGrade.classList.add('hidden');
+            } else {
+                tabByCourse.classList.remove('tab-active');
+                tabByGrade.classList.add('tab-active');
+                viewByCourse.classList.add('hidden');
+                viewByGrade.classList.remove('hidden');
+            }
+        }
+        
+        // --- Event Listeners ---
+        calculateBtn.addEventListener('click', calculateCGPA);
+        tabByCourse.addEventListener('click', () => switchTab('course'));
+        tabByGrade.addEventListener('click', () => switchTab('grade'));
+
+        // --- Initial render ---
+        renderAll();
+    </script>
+
+</body>
+</html>
+
